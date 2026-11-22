@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="moon" x1="12" y1="10" x2="52" y2="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff8b9f" />
+      <stop offset="1" stop-color="#b91f43" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="17" fill="#0b0a0e" />
+  <circle cx="32" cy="32" r="24" fill="none" stroke="url(#moon)" stroke-width="3" stroke-dasharray="137 18" stroke-linecap="round" transform="rotate(-35 32 32)" />
+  <path d="M18 27h28M22 31h20M25 31v11m14-11v11M21 25l11-7 11 7" fill="none" stroke="#fff1f1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" />
+  <text x="32" y="52" fill="#ff647d" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing=".3" text-anchor="middle">SK</text>
+</svg>

@@ -1,0 +1,10 @@
+portfolio/node_modules/
+portfolio/dist/
+portfolio/dist-server/
+fix-my-ride/node_modules/
+fix-my-ride/dist/
+fix-my-ride/dist-server/
+fix-my-ride/data/contact-messages.jsonl
+**/*.tsbuildinfo
+**/.vite/
+**/.pnpm-store/

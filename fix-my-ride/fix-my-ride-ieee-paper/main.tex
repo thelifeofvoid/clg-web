@@ -1,0 +1,239 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{xcolor}
+
+\begin{document}
+
+\title{Fix My Ride: A Context-Aware Roadside Assistance Web Application for Rapid Service Discovery and Incident Coordination}
+
+\author{
+\IEEEauthorblockN{Your Name}
+\IEEEauthorblockA{
+Department of Information Technology\\
+Your Institution\\
+City, Country\\
+your.email@example.com}
+}
+
+\maketitle
+
+\begin{abstract}
+Vehicle breakdowns create a time-sensitive coordination problem: a driver needs help, a service provider must understand the fault and location, and the request must remain visible until it is resolved. This paper presents Fix My Ride, a responsive roadside-assistance web application designed to connect stranded motorists with nearby service providers through a structured incident workflow. The proposed system combines location capture, service-category selection, provider discovery, request tracking, status updates, and basic administrative oversight in a single interface. The design emphasizes low interaction cost, clear state transitions, privacy-aware location handling, and graceful recovery when network conditions are poor. A modular architecture is described for the user interface, application services, data layer, notification layer, and operational dashboard. The paper also defines an evaluation protocol based on task completion time, request accuracy, status visibility, accessibility, and perceived trust. The work is presented as a design and prototype study; no field-trial results are claimed. Its main contribution is an implementation-oriented model for converting an unstructured roadside distress call into a traceable digital service request.
+\end{abstract}
+
+\begin{IEEEkeywords}
+roadside assistance, vehicle breakdown, web application, location-aware services, service dispatch, incident coordination, user experience, privacy
+\end{IEEEkeywords}
+
+\section{Introduction}
+Road travel depends on the availability and reliability of vehicles, yet failures such as flat tyres, dead batteries, empty fuel tanks, overheating, and minor collisions remain common sources of disruption. A driver who is stranded must often search for a service provider, communicate a location, explain a problem, compare availability, and wait for confirmation using several disconnected channels. This becomes more difficult at night, in unfamiliar areas, or when the driver has limited connectivity or low technical confidence.
+
+Road safety is also a public-safety concern. The World Health Organization reports that approximately 1.16 million people die each year in road traffic crashes and identifies road traffic injury as a major global health problem \cite{who2026}. Although Fix My Ride is not an emergency medical dispatch system, its design acknowledges that a stalled vehicle can expose occupants and other road users to additional risk. The application therefore treats location, visibility, communication, and state tracking as safety-relevant design concerns.
+
+Fix My Ride is proposed as a web-based roadside assistance application that allows a user to create a service request, describe the vehicle problem, share a location, view suitable providers, and monitor progress until completion. The provider side can accept or reject a request, update an estimated arrival time, and mark the job as completed. An administrator can supervise providers, requests, and service categories.
+
+The paper makes four contributions:
+\begin{enumerate}
+    \item It defines a practical roadside-assistance workflow that converts an informal help request into a structured incident record.
+    \item It presents a modular architecture suitable for a responsive web application and a future mobile client.
+    \item It proposes privacy, reliability, and accessibility requirements for a location-aware assistance service.
+    \item It defines an evaluation plan that measures usability and operational correctness without fabricating deployment results.
+\end{enumerate}
+
+\section{Background and Related Work}
+
+\subsection{Roadside assistance as a coordination problem}
+Traditional roadside assistance commonly depends on phone calls, third-party directories, automobile clubs, insurers, or informal local contacts. These channels can provide help, but they place a large information burden on the stranded driver. The driver may need to repeat the vehicle type, issue, landmark, contact number, and exact location. The service provider may not receive a consistent record of the request or its priority.
+
+The National Highway Traffic Safety Administration recommends that motorists carry an emergency roadside kit and prepare for breakdown situations \cite{nhtsa2026}. Preparation reduces risk, but it does not solve the coordination problem after a breakdown occurs. A digital workflow can supplement preparedness by keeping essential request information together and making the service state visible.
+
+\subsection{Location-aware service design}
+Location-aware applications can reduce the time required to describe where assistance is needed. However, location is sensitive data. A useful system should request permission at the point where location improves the task, clearly explain how it will be used, and provide a manual fallback when positioning is unavailable or inaccurate. Fix My Ride therefore treats automatic location as an aid rather than a mandatory precondition.
+
+\subsection{Gap addressed by this work}
+Many service marketplaces focus on discovery and payment, while emergency-oriented systems focus on high-severity public incidents. A roadside breakdown sits between these categories. It may not require emergency dispatch, but it still benefits from rapid discovery, reliable communication, and an auditable status history. Fix My Ride addresses this middle layer with a focused workflow: report, match, accept, track, and resolve.
+
+\section{Problem Definition and Objectives}
+The problem is defined as follows: given a stranded driver with an uncertain vehicle issue and a potentially incomplete location description, provide a reliable mechanism to request an appropriate service provider and monitor the request through resolution.
+
+The system objectives are:
+\begin{itemize}
+    \item minimize the number of fields required to submit a request;
+    \item support both automatic and manual location entry;
+    \item classify common breakdown categories such as tyre, battery, fuel, towing, lockout, and general repair;
+    \item present provider availability and estimated arrival information in a consistent format;
+    \item preserve a clear request history and status trail;
+    \item protect personal and location data through least-privilege access;
+    \item remain usable on small screens and under stressful conditions.
+\end{itemize}
+
+The scope excludes emergency medical dispatch, law-enforcement reporting, vehicle diagnosis requiring professional inspection, and guaranteed arrival times. If a user reports immediate danger, the interface should direct them to the appropriate local emergency service rather than presenting Fix My Ride as a replacement.
+
+\section{System Architecture}
+The proposed architecture uses five logical layers:
+\begin{enumerate}
+    \item \textbf{Presentation layer:} responsive pages for registration, service selection, request creation, request tracking, provider operations, and administration.
+    \item \textbf{Application layer:} authentication, request validation, provider matching, status transitions, notification orchestration, and audit logging.
+    \item \textbf{Data layer:} user profiles, vehicles, providers, service categories, assistance requests, location records, and status events.
+    \item \textbf{Integration layer:} geolocation, map or geocoding services, email or push notifications, and optional payment services.
+    \item \textbf{Operations layer:} provider onboarding, service-area configuration, incident supervision, and basic reporting.
+\end{enumerate}
+
+The separation allows the user interface to evolve without changing the request model. It also permits the project to begin as a website and later add native mobile clients or a provider application.
+
+\subsection{Actors}
+The primary actors are:
+\begin{itemize}
+    \item \textbf{Customer:} creates and tracks an assistance request.
+    \item \textbf{Service provider:} receives eligible requests, accepts a job, updates progress, and closes the job.
+    \item \textbf{Administrator:} verifies providers, manages categories, and supervises unresolved requests.
+    \item \textbf{External service:} supplies geolocation, mapping, messaging, or payment capabilities.
+\end{itemize}
+
+\subsection{Request data model}
+A request should contain a unique identifier, customer identifier, vehicle identifier, selected service category, problem description, contact method, location representation, creation time, current status, provider identifier when assigned, and an event history. A location record can include latitude and longitude when consent is granted, a human-readable address, a landmark, and an accuracy estimate. The system should avoid collecting unrelated data.
+
+A simplified request state machine is:
+\[
+\text{Draft} \rightarrow \text{Submitted} \rightarrow \text{Matching} \rightarrow \text{Accepted} \rightarrow \text{En Route} \rightarrow \text{Arrived} \rightarrow \text{Completed}.
+\]
+Cancellation, rejection, timeout, and escalation are alternative transitions. Every transition should be timestamped and associated with the actor that performed it.
+
+\subsection{Provider matching}
+A first implementation can rank providers using a transparent score:
+\[
+\begin{aligned}
+S(p)={}&w_dD(p)+w_cC(p)\\
+       &+w_aA(p)+w_rR(p),
+\end{aligned}
+\]
+where $D(p)$ is normalized distance, $C(p)$ is category compatibility, $A(p)$ is availability, and $R(p)$ is an optional reliability score. The weights should be configured and documented rather than hidden. Distance must not be presented as a guaranteed arrival time because traffic, road conditions, provider workload, and location accuracy affect actual arrival.
+
+\section{Methodology}
+
+This work follows a design-science approach. The process consists of requirement analysis, workflow modeling, prototype implementation, scenario testing, and evaluation planning.
+
+\subsection{Requirement analysis}
+Requirements were derived from the breakdown scenario and divided into functional and non-functional groups. Functional requirements describe what the application does: create a request, select a category, attach a location, match a provider, update status, and maintain history. Non-functional requirements describe qualities: responsiveness, accessibility, privacy, reliability, and maintainability.
+
+\subsection{Scenario modeling}
+The core scenario begins when a driver selects "`Request Assistance." The application asks for the vehicle and problem category, offers automatic location permission, and provides a manual landmark field. Before submission, the user reviews a compact summary. After submission, the request enters a matching state. A provider can accept it and provide an estimated arrival window. The user sees the current state, provider contact option, and cancellation or escalation path.
+
+Alternative scenarios include denied location permission, no provider available, duplicate submission, provider rejection, temporary network loss, and user cancellation. These scenarios are important because a roadside-assistance system must communicate uncertainty instead of silently failing.
+
+\subsection{Prototype strategy}
+The prototype can be implemented with a responsive TypeScript and React client, a REST-style service layer, and a persistent database. The client should use semantic controls, visible validation, keyboard support, and a high-contrast status display. The server should validate all input again because client-side validation alone is insufficient. The design does not require a particular database vendor; a relational model is appropriate because users, providers, requests, and status events have clear relationships.
+
+\section{Functional Design and Implementation}
+
+\subsection{Customer workflow}
+The customer journey is intentionally short:
+\begin{enumerate}
+    \item Sign in or continue with a verified contact method.
+    \item Select a vehicle or enter basic vehicle information.
+    \item Choose a problem category.
+    \item Confirm the current location or enter a landmark manually.
+    \item Submit the request and review the tracking screen.
+\end{enumerate}
+
+The request form should display only fields relevant to the selected category. For example, a tyre request may ask for the number of affected tyres, while a battery request may ask whether the vehicle can start. Conditional fields reduce cognitive load and improve the quality of information sent to providers.
+
+\subsection{Provider workflow}
+A provider dashboard should show new requests within the provider's service area, the required category, approximate distance, customer contact preference, and request age. Accepting a request changes its state and makes the provider visible to the customer. The provider can then update "`En Route,'' "`Arrived,'' and "`Completed.'' A rejection should require a reason category so that the system can distinguish capacity issues from category mismatch.
+
+\subsection{Notifications and status visibility}
+Notifications should be event-driven and idempotent. If the same status event is delivered twice, the user should still see one logical update. The tracking view should show the latest state, the time of the last update, and a next-action message. For example, "`Provider accepted - waiting for arrival update'' is more useful than showing only an internal status code.
+
+\subsection{Administrative controls}
+The administrator can approve or suspend providers, define service categories, inspect unresolved requests, and review basic operational metrics. Administrative actions should be logged. Access to customer location and contact details should be limited to users who need the information to fulfill the request.
+
+\section{Security, Privacy, and Reliability}
+
+Location and contact details are necessary for service delivery but create privacy risk. Fix My Ride should apply the following controls:
+\begin{itemize}
+    \item request location permission only when needed and explain its purpose;
+    \item store the minimum location precision required for dispatch;
+    \item restrict location visibility to the assigned provider and authorized staff;
+    \item use encrypted transport and secure credential storage;
+    \item apply role-based authorization on every protected operation;
+    \item rate-limit request creation and authentication attempts;
+    \item validate uploaded content and sanitize user-provided descriptions;
+    \item keep an audit trail for assignment, cancellation, escalation, and completion;
+    \item define a retention period for inactive requests and location records.
+\end{itemize}
+
+Reliability also requires graceful degradation. If geolocation fails, the user should be able to enter a landmark or address. If a notification fails, the request must remain visible in the application. If the provider does not respond within a configured period, the request should return to matching or be escalated to an administrator. These behaviors are preferable to a silent timeout.
+
+The system should show a clear safety notice: users should move to a safe location when possible, use hazard lights, avoid standing in traffic, and contact local emergency services when there is immediate danger. The notice should be concise and should not obstruct the primary assistance request.
+
+\section{Evaluation Plan}
+
+Because this paper describes a prototype rather than a completed field deployment, evaluation is specified as a reproducible plan. A pilot can recruit customer participants and service-provider participants and assign them realistic scenarios such as a flat tyre, dead battery, incorrect location permission, and no-provider-available condition.
+
+The primary measures are:
+
+\begin{table}[t]
+\caption{Proposed Evaluation Measures}
+\label{tab:metrics}
+\centering
+\begin{tabular}{p{0.25\columnwidth} p{0.58\columnwidth}}
+\toprule
+Measure & Operational definition \\
+\midrule
+Task completion time & Time from request start to successful submission. \\
+Request accuracy & Percentage of requests containing valid category, contact, and location data. \\
+Status visibility & Percentage of participants who correctly identify the current request state. \\
+Recovery rate & Percentage of simulated failures completed using a fallback path. \\
+Accessibility & Completion with keyboard navigation, readable contrast, and screen-reader labels. \\
+Trust and clarity & Post-task rating of safety, transparency, and confidence. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A successful pilot should demonstrate that users can submit a valid request quickly, understand whether a provider has accepted it, recover from denied location permission, and identify what to do when no provider is available. Performance measurements should be reported with sample size, task conditions, and variance. No numerical performance claim should be made without recorded observations.
+
+A technical evaluation should additionally test authorization boundaries, duplicate submissions, expired sessions, malformed coordinates, repeated notifications, provider status conflicts, and intermittent connectivity. Load tests can measure request creation and status-update latency under realistic concurrent demand.
+
+\section{Limitations and Future Work}
+
+The proposed matching score is intentionally simple and may not represent actual travel time. A production system would need routing, traffic data, provider capacity, service quality monitoring, and mechanisms to prevent unfair ranking. Automatic diagnosis is also out of scope: a customer-selected category is a communication aid, not a mechanical determination.
+
+The prototype does not establish whether providers will consistently update status or whether customers will trust location sharing. These questions require field studies and operational partnerships. Future work should explore offline-first request capture, multilingual voice-assisted forms, fraud-resistant provider verification, transparent pricing, live route estimation, accessibility testing with disabled users, and privacy-preserving analytics.
+
+If the service expands to multiple regions, its emergency guidance, payment handling, tax rules, data-retention policy, and provider licensing requirements must be reviewed for each jurisdiction. The product should also separate roadside assistance from emergency response and make that boundary visible in every user journey.
+
+\section{Conclusion}
+Fix My Ride presents a focused approach to roadside assistance in which a breakdown is represented as a structured, traceable service request rather than an informal series of calls and messages. The design combines category-based reporting, consent-aware location capture, provider matching, explicit status transitions, and operational oversight. Its value is not only in locating a service provider, but also in reducing ambiguity about what has been requested, who is responsible, and what happens next.
+
+The proposed architecture is suitable for a responsive web prototype and can be extended to mobile clients and additional integrations. The evaluation plan provides a path to validate usability, reliability, accessibility, and privacy before making stronger claims. With careful handling of safety boundaries and personal data, Fix My Ride can serve as a practical foundation for a location-aware roadside assistance platform.
+
+\begin{thebibliography}{00}
+
+\bibitem{who2026}
+World Health Organization, "`Road traffic injuries,'' Fact sheet, Jul. 20, 2026. [Online]. Available: \url{https://www.who.int/news-room/fact-sheets/detail/road-traffic-injuries}
+
+\bibitem{nhtsa2026}
+National Highway Traffic Safety Administration, "`Summer driving tips,'' U.S. Department of Transportation. [Online]. Available: \url{https://www.nhtsa.gov/summer-driving-tips}
+
+\bibitem{ieee2026}
+IEEE Author Center, "`Authoring tools and templates,'' IEEE. [Online]. Available: \url{https://conferences.ieeeauthorcenter.ieee.org/write-your-paper/authoring-tools-and-templates/}
+
+\bibitem{w3cgeo}
+World Wide Web Consortium, "`Geolocation API specification,'' W3C. [Online]. Available: \url{https://www.w3.org/TR/geolocation/}
+
+\bibitem{owasp}
+OWASP Foundation, "`Application Security Verification Standard 4.0.3,'' 2023. [Online]. Available: \url{https://github.com/OWASP/ASVS}
+
+\bibitem{osm}
+OpenStreetMap Foundation, "`Nominatim usage policy,'' OpenStreetMap. [Online]. Available: \url{https://operations.osmfoundation.org/policies/nominatim/}
+
+\end{thebibliography}
+
+\end{document}
+
