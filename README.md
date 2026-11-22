@@ -13,3 +13,10 @@ Double-click `start-both.cmd` in this folder.
 - Fix My Ride: http://localhost:5173
 
 The launcher starts only the host that is not already running and opens both pages in your browser.
+
+## Live on GitHub Pages
+
+- Portfolio: https://thelifeofvoid.github.io/clg-web/portfolio/
+- Fix My Ride: https://thelifeofvoid.github.io/clg-web/fix-my-ride/
+
+GitHub Pages hosts the built frontends. The local Express contact API still runs only when using the local launchers.

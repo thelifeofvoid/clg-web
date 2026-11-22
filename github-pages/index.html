@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Sachin Kekan's portfolio and Fix My Ride research prototype." />
+    <title>Sachin Kekan — Projects</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #090a10; color: #f5f3ed; }
+      body { min-height: 100vh; margin: 0; display: grid; place-items: center; background: radial-gradient(circle at 20% 20%, #401426, transparent 38%), radial-gradient(circle at 80% 70%, #1b2733, transparent 35%), #090a10; }
+      main { width: min(720px, calc(100% - 40px)); padding: 56px 0; }
+      p, a { color: #c8c2c8; }
+      .eyebrow { color: #ff4966; font-size: 11px; letter-spacing: .18em; }
+      h1 { margin: 18px 0 12px; font-size: clamp(48px, 10vw, 92px); line-height: .92; letter-spacing: -.07em; }
+      h1 span { color: #ff4966; }
+      .intro { max-width: 540px; line-height: 1.7; }
+      .links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 36px; }
+      .card { display: block; padding: 22px; border: 1px solid rgba(255,255,255,.16); border-radius: 16px; text-decoration: none; background: rgba(255,255,255,.06); transition: transform .2s, border-color .2s; }
+      .card:hover { transform: translateY(-4px); border-color: #ff4966; }
+      .card strong { display: block; color: #fff; font-size: 20px; }
+      .card small { display: block; margin-top: 8px; color: #aaa1aa; line-height: 1.5; }
+      footer { margin-top: 48px; color: #827982; font-size: 12px; }
+      @media (max-width: 560px) { .links { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="eyebrow">SACHIN KEKAN · PROJECTS + BUILDS</div>
+      <h1>Selected <span>work.</span></h1>
+      <p class="intro">Explore the personal portfolio and the Fix My Ride roadside assistance research prototype.</p>
+      <div class="links">
+        <a class="card" href="./portfolio/"><strong>Portfolio</strong><small>Personal site, projects, motion, and 3D experiments.</small></a>
+        <a class="card" href="./fix-my-ride/"><strong>Fix My Ride</strong><small>A location-aware roadside assistance research prototype.</small></a>
+      </div>
+      <footer>Built with React, TypeScript, Three.js, and Vite.</footer>
+    </main>
+  </body>
+</html>

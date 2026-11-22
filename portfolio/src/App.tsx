@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import {
   ArrowDown,
   ArrowDownRight,
@@ -191,6 +191,16 @@ function App() {
       website: String(values.get("website") || "")
     };
 
+    if (import.meta.env.PROD && import.meta.env.BASE_URL !== "/") {
+      const subject = encodeURIComponent(`Portfolio message from ${payload.name}`);
+      const body = encodeURIComponent(`Name: ${payload.name}\nEmail: ${payload.email}\n\n${payload.message}`);
+      window.location.href = `mailto:officialsachinkekan@gmail.com?subject=${subject}&body=${body}`;
+      form.reset();
+      setStatus("saved");
+      setNotice("Your email app will open with this message.");
+      return;
+    }
+
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -215,7 +225,11 @@ function App() {
 
   return (
     <>
-      <div className="site-backdrop" aria-hidden="true" />
+      <div
+        className="site-backdrop"
+        aria-hidden="true"
+        style={{ "--site-backdrop-image": `url("${import.meta.env.BASE_URL}crimson-moon-background.png")` } as CSSProperties}
+      />
       <div className="pointer-glow" aria-hidden="true" />
       <PetalField />
       <StaggeredMenu

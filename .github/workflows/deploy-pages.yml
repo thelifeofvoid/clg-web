@@ -1,0 +1,70 @@
+name: Deploy both websites to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up pnpm
+        run: npm install --global pnpm@10
+
+      - name: Build portfolio
+        working-directory: portfolio
+        env:
+          VITE_BASE_PATH: /clg-web/portfolio/
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+      - name: Build Fix My Ride
+        working-directory: fix-my-ride
+        env:
+          VITE_BASE_PATH: /clg-web/fix-my-ride/
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+      - name: Assemble Pages site
+        run: |
+          mkdir -p _site/portfolio _site/fix-my-ride
+          cp -R github-pages/. _site/
+          cp -R portfolio/dist/. _site/portfolio/
+          cp -R fix-my-ride/dist/. _site/fix-my-ride/
+          touch _site/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
